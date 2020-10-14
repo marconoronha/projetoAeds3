@@ -576,7 +576,8 @@ public class Main{
             System.out.println("\n______________Comentários______________\n");
 
             System.out.println("\n______________Respostas______________\n");
-            listaRespostas(arvorePR.read(p.getID()));
+            int[] arrayIdRespostas = arvorePR.read(p.getID());
+            listaRespostas(arrayIdRespostas);
         
             System.out.println("\n\n1 - Responder");
             System.out.println("2 - Comentar");
@@ -768,7 +769,7 @@ public class Main{
 
         for(int i = 0; i < arrayIdRespostas.length; i++){
             Resposta temp = arqRespostas.read(arrayIdRespostas[i]);
-            System.out.print("\n\n"+(i+1)+". ");
+            System.out.print("\n"+(i+1)+". ");
             System.out.println(temp);
 
             System.out.println("\n___________________________________");
