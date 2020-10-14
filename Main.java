@@ -6,9 +6,12 @@ import java.io.*;
 public class Main{
     private static CRUD<User> arqUser;
     private static CRUD<Pergunta> arqPerguntas;
+    private static CRUD<Resposta> arqRespostas;
     private static int idUsuarioAtual;
     public static Scanner leitor = new Scanner(System.in);
-    private static ArvoreBMais_Int_Int relacaoUP;
+    private static ArvoreBMais_Int_Int arvoreUP;
+    private static ArvoreBMais_Int_Int arvorePR;
+    private static ArvoreBMais_Int_Int arvoreUR;
     private static ListaInvertida listaInvertida;
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -19,7 +22,13 @@ public class Main{
         try {
 
             arqUser = new CRUD<>(User.class.getConstructor(), "dados/users.db");
-            relacaoUP = new ArvoreBMais_Int_Int(10, "dados/arvRelacaoUserPerg.idx");
+            arqPerguntas = new CRUD<>(Pergunta.class.getConstructor(), "dados/perguntas.db");
+            arqRespostas = new CRUD<>(Resposta.class.getConstructor(), "dados/respostas.db");
+            
+            arvoreUP = new ArvoreBMais_Int_Int(10, "dados/arvRelacaoUserPerg.idx");
+            arvorePR = new ArvoreBMais_Int_Int(10, "dados/arvRelacaoPergResp.idx");
+            arvoreUR = new ArvoreBMais_Int_Int(10, "dados/arvRelacaoUserResp.idx");
+            
             listaInvertida = new ListaInvertida(5, "dados/dicionario", "dados/dicBlocos");
 
             do {
@@ -105,7 +114,7 @@ public class Main{
 
         } while (opcao == 1 && !emailCorreto);
 
-        if (emailCorreto) {
+        if (emailCorreto){
 
             for (i = 0; i < 3; i++) {//3 tentativas para acertar a senha
                 System.out.print("Senha: ");
@@ -224,7 +233,6 @@ public class Main{
         int opcao;
 
         try{
-            arqPerguntas = new CRUD<>(Pergunta.class.getConstructor(), "dados/perguntas.db");
 
             do{
                 System.out.println("\n\n-------------------------------");
@@ -249,13 +257,10 @@ public class Main{
 
                     case 2: {
                         consulta();
-                        Thread.sleep(1500);
                     }break;
 
                     case 3: {
                         System.out.println("Não há nada aqui ainda (Não implementado)");
-                        listaInvertida.print();
-                        Thread.sleep(1500);
                     }break;
 
                     case 0: break;
@@ -275,7 +280,7 @@ public class Main{
 
     //======================================Metodos Minhas Perguntas==============================================//
 
-    private static void minhasPerguntas() throws InterruptedException {
+    private static void minhasPerguntas() throws Exception {
         int opcao; 
 
         try{
@@ -305,7 +310,7 @@ public class Main{
                         System.out.println("-------------------------------");
 
 
-                        listaPerguntas(relacaoUP.read(idUsuarioAtual));
+                        listaPerguntas(arvoreUP.read(idUsuarioAtual));
 
                         System.out.println("\nPressione qualquer tecla para voltar");
                         leitor.nextLine();
@@ -332,16 +337,11 @@ public class Main{
 
                             if(opcao == 1){
                                 termosChave = converteChaves(termosChave);
-                                Pergunta novaPergunta_obj = new Pergunta(idUsuarioAtual, novaPergunta, termosChave);                                
-                                
-                                try{
-                                    arqPerguntas.create(novaPergunta_obj);
-                                    relacaoUP.create(idUsuarioAtual, novaPergunta_obj.getID());
-                                    String[] tmp = termosChave.split(";");
-                                    adicionaTermosChaves(tmp, novaPergunta_obj.getID());
-                                }catch(Exception e){
-                                    e.printStackTrace();
-                                }
+                                Pergunta novaPergunta_obj = new Pergunta(idUsuarioAtual, novaPergunta, termosChave);
+                                arqPerguntas.create(novaPergunta_obj);
+                                arvoreUP.create(idUsuarioAtual, novaPergunta_obj.getID());
+                                String[] tmp = termosChave.split(";");
+                                adicionaTermosChaves(tmp, novaPergunta_obj.getID());                                
 
                                 System.out.println("Pergunta criada!");
                                 
@@ -366,7 +366,7 @@ public class Main{
 
                         Pergunta temp;
 
-                        int [] arrayPerguntas = relacaoUP.read(idUsuarioAtual);
+                        int [] arrayPerguntas = arvoreUP.read(idUsuarioAtual);
                         arrayPerguntas = retiraArquivadas(arrayPerguntas);
                         listaPerguntas(arrayPerguntas);
 
@@ -425,7 +425,7 @@ public class Main{
 
                         Pergunta temp;
 
-                        int [] arrayPerguntas = relacaoUP.read(idUsuarioAtual);
+                        int [] arrayPerguntas = arvoreUP.read(idUsuarioAtual);
                         arrayPerguntas = retiraArquivadas(arrayPerguntas);
                         listaPerguntas(arrayPerguntas);
 
@@ -497,6 +497,7 @@ public class Main{
         System.out.println("Busque as perguntas por palavra chave separadas por ponto e vírgula");
         System.out.println("Ex: política;eleições 2020;Brasil");
         System.out.print("\nBuscar: ");
+
         String termosDigitados = leitor.nextLine();
 
         termosDigitados = converteChaves(termosDigitados);
@@ -569,13 +570,14 @@ public class Main{
     public static void exibePerguntaCompleta(Pergunta p) throws Exception {
         User autor = arqUser.read(p.getUserID());
         int opcao;
-        System.out.println("\n"+p.toString(autor.nome));
-
-        System.out.println("\n__________Comentários__________\n");
-
-        System.out.println("\n___________Respostas___________\n");
-
+        
         do{
+            System.out.println("\n"+p.toString(autor.nome));
+            System.out.println("\n______________Comentários______________\n");
+
+            System.out.println("\n______________Respostas______________\n");
+            listaRespostas(arvorePR.read(p.getID()));
+        
             System.out.println("\n\n1 - Responder");
             System.out.println("2 - Comentar");
             System.out.println("3 - Avaliar");
@@ -591,17 +593,16 @@ public class Main{
 
             switch(opcao){
                 case 1:{
-                    System.out.println("1 - Responder (não implementado)");
-                    break;
-                }
+                    respostas(p);                    
+                }break;
+
                 case 2:{
-                    System.out.println("2 - Comentar (não implementado)");
-                    break;
-                }
+                    System.out.println("2 - Comentar (não implementado)");                    
+                }break;
+
                 case 3:{
-                    System.out.println("3 - Avaliar (não implementado)");
-                    break;
-                }
+                    System.out.println("3 - Avaliar (não implementado)");                    
+                }break;
 
                 case 0: break;
 
@@ -636,8 +637,6 @@ public class Main{
             quicksort(dados, inicio, posPivo - 1);
             quicksort(dados, posPivo+1, fim);
         }
-
-    
     }
 
     private static int _quicksort(Pergunta[] dados, int inicio, int fim){
@@ -665,14 +664,115 @@ public class Main{
         return f;
     }
 
+    //======================================Metodos Respostas==================================================//
+
+    public static void respostas(Pergunta p) throws Exception {
+        int opcao;
+        
+        do{    
+            System.out.println("\n\n-------------------------------");
+            System.out.println("           Respostas");
+            System.out.println("-------------------------------");
+
+            System.out.println("\n"+p);
+            System.out.println("\n1 - Listar minhas respostas");
+            System.out.println("2 - Responder");
+            System.out.println("3 - Alterar");
+            System.out.println("4 - Arquivar");
+
+            System.out.println("\n0 - Retornar");
+
+            System.out.print("\nOpção: ");
+            
+            try {
+                opcao = Integer.valueOf(leitor.nextLine());
+            } catch(NumberFormatException e) {
+                opcao = -1;
+            }
+
+            switch(opcao){
+                case 1:{
+                    System.out.println("(não implementado)");                    
+                }break;
+
+                case 2:{
+                    responder(p.getID());                    
+                }break;
+
+                case 3:{
+                    System.out.println("(não implementado)");                    
+                }break;
+
+                case 4:{
+                    System.out.println("(não implementado)");                    
+                }break;
+
+                case 0: break;
+
+                default: {
+                    System.out.println("Opção Inválida!");
+                    Thread.sleep(1500);
+                }
+            }
+        }while(opcao != 0);
+    }
+
+    public static void responder(int idPergunta) throws Exception {
+        System.out.println("\n\n-------------------------------");
+        System.out.println("           Respostas > Responder");
+        System.out.println("-------------------------------");
+
+        System.out.println("Digite sua resposta:");
+        String novaResposta = leitor.nextLine();
+
+        System.out.println("\nConfirmar?:");
+        int opcao = confirmar();
+        
+        if(opcao == 1){
+            Resposta r = new Resposta(idPergunta, idUsuarioAtual, novaResposta);
+            arqRespostas.create(r);
+            arvorePR.create(idPergunta, r.getID());
+            arvoreUR.create(idUsuarioAtual, r.getID());            
+            System.out.println("Resposta postada!");
+            Thread.sleep(1500);
+        }else{
+            System.out.println("Criação cancelada!");
+            Thread.sleep(1500);
+        }
+    }
+
+
+
     //======================================Metodos Auxiliares==================================================//
 
     public static int listaPerguntas(int[] arrayIdPerguntas) throws Exception{
         int cont = 0;
+
+        System.out.println("\t\nListando:\n___________________________________");
+
         for(int i = 0; i < arrayIdPerguntas.length; i++){
             Pergunta temp = arqPerguntas.read(arrayIdPerguntas[i]);
             System.out.print("\n\n"+(i+1)+". ");
             System.out.println(temp);
+
+            System.out.println("\n___________________________________");
+
+            cont++;
+        }
+
+        return cont;
+    }
+
+    public static int listaRespostas(int[] arrayIdRespostas) throws Exception{
+        int cont = 0;
+
+        for(int i = 0; i < arrayIdRespostas.length; i++){
+            Resposta temp = arqRespostas.read(arrayIdRespostas[i]);
+            System.out.print("\n\n"+(i+1)+". ");
+            System.out.println(temp);
+
+            System.out.println("\n___________________________________");
+
             cont++;
         }
 
@@ -714,6 +814,8 @@ public class Main{
         return opcao;
     }
 
+     //====================================== Metodos Termos Chaves ==================================================//
+
     public static String converteChaves(String termosChaves){
         String convertida = termosChaves;
 
@@ -723,10 +825,10 @@ public class Main{
         convertida = convertida.replaceAll("; ",";");
         convertida = convertida.replaceAll(" ;",";");
         convertida = convertida.replaceAll(" ", "-");
-        
+
         convertida = convertida.replaceAll("ç", "c");
         convertida = convertida.replaceAll("ñ", "n");
-        
+
         convertida = convertida.replaceAll("á", "a");
         convertida = convertida.replaceAll("à", "a");
         convertida = convertida.replaceAll("â", "a");
@@ -737,7 +839,7 @@ public class Main{
         convertida = convertida.replaceAll("è", "e");
         convertida = convertida.replaceAll("ê", "e");
         convertida = convertida.replaceAll("ë", "e");
-        
+
         convertida = convertida.replaceAll("í", "i");
         convertida = convertida.replaceAll("ì", "i");
         convertida = convertida.replaceAll("î", "i");
