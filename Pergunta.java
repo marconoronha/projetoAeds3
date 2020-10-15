@@ -59,12 +59,8 @@ public class Pergunta implements Registro{
             temp += " | (ARQUIVADA)";
         }
 
-        temp += "\n" + pergunta + "\n" + formatador.format(this.criacao);
-
-        if(criacao < alteracao){
-            temp += " - Editada em "+formatador.format(this.alteracao);
-        }
-
+        temp += "\n" + pergunta;
+        
         temp += "\nTermos Chave: [";
         String[] splitted = termosChave.split(";");
         for(int i = 0; i < splitted.length; i++){
@@ -73,6 +69,12 @@ public class Pergunta implements Registro{
                 temp += " [";
             }
         }
+
+        temp += "\n" + formatador.format(this.criacao);
+        if(criacao < alteracao){
+            temp += " - Editada em "+formatador.format(this.alteracao);
+        }
+
 
         return temp;
     }

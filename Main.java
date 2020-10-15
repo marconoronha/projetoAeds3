@@ -537,36 +537,6 @@ public class Main{
                 
     }
 
-    public static int[] procuraTermosChaves(String termosChave) throws Exception {
-        String tmp[] = termosChave.split(";");
-        HashSet<Integer> arrset1 = new HashSet<Integer>();
-        HashSet<Integer> arrset2 = new HashSet<Integer>();
-        int a1[] = listaInvertida.read(tmp[0]);
-        int a2[];
-
-        for(int i = 0; i < a1.length; i++){
-            arrset1.add(a1[i]);
-        }
-
-        for(int i = 1; i < tmp.length; i++){
-            a2 = listaInvertida.read(tmp[i]);
-            for(int j = 0; j < a2.length; j++){
-                arrset2.add(a2[j]);
-            }
-            arrset1.retainAll(arrset2);
-        }
-
-        int[] conjResposta = new int[arrset1.size()];
-        
-        int k = 0;
-
-        for(int i : arrset1){
-            conjResposta[k++] = i;
-        }
-
-        return conjResposta;
-    }
-
     public static void exibePerguntaCompleta(Pergunta p) throws Exception {
         User autor = arqUser.read(p.getUserID());
         int opcao;
@@ -721,7 +691,7 @@ public class Main{
         System.out.println("\n"+p);
 
         System.out.println("\t\nListando:\n___________________________________");
-        listaRespostas(arrayIdMinhasRespostas);
+        listaMinhasRespostas(arrayIdMinhasRespostas, p.getID());
 
         System.out.println("\nPressione qualquer tecla para voltar");
         leitor.nextLine();
@@ -806,6 +776,36 @@ public class Main{
         adicionaTermosChaves(tmp2, idPerg);
     }
 
+    public static int[] procuraTermosChaves(String termosChave) throws Exception {
+        String tmp[] = termosChave.split(";");
+        HashSet<Integer> arrset1 = new HashSet<Integer>();
+        HashSet<Integer> arrset2 = new HashSet<Integer>();
+        int a1[] = listaInvertida.read(tmp[0]);
+        int a2[];
+
+        for(int i = 0; i < a1.length; i++){
+            arrset1.add(a1[i]);
+        }
+
+        for(int i = 1; i < tmp.length; i++){
+            a2 = listaInvertida.read(tmp[i]);
+            for(int j = 0; j < a2.length; j++){
+                arrset2.add(a2[j]);
+            }
+            arrset1.retainAll(arrset2);
+        }
+
+        int[] conjResposta = new int[arrset1.size()];
+        
+        int k = 0;
+
+        for(int i : arrset1){
+            conjResposta[k++] = i;
+        }
+
+        return conjResposta;
+    }
+
     public static void adicionaTermosChaves(String[] tmp, int idPerg) throws Exception {
 
         for(int i = 0; i < tmp.length; i++){
@@ -820,7 +820,7 @@ public class Main{
         }
     }
 
-        //======================================Metodos Auxiliares==================================================//
+    //======================================Metodos Auxiliares==================================================//
 
     public static int listaPerguntas(int[] arrayIdPerguntas) throws Exception{
         int cont = 0;
@@ -829,8 +829,9 @@ public class Main{
 
         for(int i = 0; i < arrayIdPerguntas.length; i++){
             Pergunta temp = arqPerguntas.read(arrayIdPerguntas[i]);
+            User autor = arqUser.read(temp.getUserID());
             System.out.print("\n\n"+(i+1)+". ");
-            System.out.println(temp);
+            System.out.println(temp+" por "+autor.nome);
 
             System.out.println("\n___________________________________");
 
@@ -845,8 +846,9 @@ public class Main{
 
         for(int i = 0; i < arrayIdRespostas.length; i++){
             Resposta temp = arqRespostas.read(arrayIdRespostas[i]);
+            User autor = arqUser.read(temp.getUserID());
             System.out.print("\n"+(i+1)+". ");
-            System.out.println(temp);
+            System.out.println(temp+" por "+autor.nome);
 
             System.out.println("\n___________________________________");
 
@@ -856,7 +858,30 @@ public class Main{
         return cont;
     }
 
+    public static int listaMinhasRespostas(int[] arrayIdMinhasRespostas, int idPergunta) throws Exception{
+        HashSet<Integer> idMinhasRespostasParaEssaPergunta = new HashSet<Integer>();
 
+        for(int i = 0; i < arrayIdMinhasRespostas.length; i++){
+            Resposta temp = arqRespostas.read(arrayIdMinhasRespostas[i]);
+            
+            if(temp.getPerguntaID() == idPergunta){
+                idMinhasRespostasParaEssaPergunta.add(temp.getID());
+            }
+        }
+
+        int[] conjResposta = new int[idMinhasRespostasParaEssaPergunta.size()];
+        
+        int k = 0;
+
+        for(int i : idMinhasRespostasParaEssaPergunta){
+            conjResposta[k++] = i;
+        }
+
+        int cont = listaRespostas(conjResposta);
+
+
+        return cont;
+    }
 
     public static int[] retiraArquivadas(int[] arrayIdPerguntas) throws Exception {
         int[] aux = new int[arrayIdPerguntas.length];
