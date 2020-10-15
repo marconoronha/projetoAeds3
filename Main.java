@@ -492,7 +492,7 @@ public class Main{
         Pergunta temp;
 
         System.out.println("\n\n-------------------------------");
-        System.out.println("        Menu Principal > Minhas Perguntas > Consultar Perguntas");
+        System.out.println("        Menu Principal > Consultar Perguntas");
         System.out.println("-------------------------------");
         System.out.println("Busque as perguntas por palavra chave separadas por ponto e vírgula");
         System.out.println("Ex: política;eleições 2020;Brasil");
@@ -727,79 +727,6 @@ public class Main{
         leitor.nextLine();
     }
 
-
-
-    //======================================Metodos Auxiliares==================================================//
-
-    public static int listaPerguntas(int[] arrayIdPerguntas) throws Exception{
-        int cont = 0;
-
-        System.out.println("\t\nListando:\n___________________________________");
-
-        for(int i = 0; i < arrayIdPerguntas.length; i++){
-            Pergunta temp = arqPerguntas.read(arrayIdPerguntas[i]);
-            System.out.print("\n\n"+(i+1)+". ");
-            System.out.println(temp);
-
-            System.out.println("\n___________________________________");
-
-            cont++;
-        }
-
-        return cont;
-    }
-
-    public static int listaRespostas(int[] arrayIdRespostas) throws Exception{
-        int cont = 0;
-
-        for(int i = 0; i < arrayIdRespostas.length; i++){
-            Resposta temp = arqRespostas.read(arrayIdRespostas[i]);
-            System.out.print("\n"+(i+1)+". ");
-            System.out.println(temp);
-
-            System.out.println("\n___________________________________");
-
-            cont++;
-        }
-
-        return cont;
-    }
-
-    public static int[] retiraArquivadas(int[] arrayIdPerguntas) throws Exception {
-        int[] aux = new int[arrayIdPerguntas.length];
-        int j = 0;
-
-        for(int i = 0; i < arrayIdPerguntas.length; i++){
-            Pergunta temp = arqPerguntas.read(arrayIdPerguntas[i]);            
-            if(temp.ativa){
-                aux[j] = temp.getID();
-                j++;
-            }
-        }
-
-        int[] arrayAtivas = new int[j];
-        for(int i = 0; i < j; i++){
-            arrayAtivas[i] = aux[i];
-        }
-
-        return arrayAtivas;
-    }
-
-    public static int confirmar() throws InterruptedException {
-        int opcao;
-        System.out.println("1 - Sim");
-        System.out.println("2 - Não");
-        System.out.print("\nOpção: ");
-
-        try {
-            opcao = Integer.valueOf(leitor.nextLine());
-        } catch(NumberFormatException e) {
-            opcao = 2;
-            System.out.println("Opção inválida!");
-        }
-        return opcao;
-    }
-
      //====================================== Metodos Termos Chaves ==================================================//
 
     public static String converteChaves(String termosChaves){
@@ -891,6 +818,79 @@ public class Main{
         for(int i = 0; i < tmp.length; i++){
             listaInvertida.delete(tmp[i], idPerg);
         }
+    }
+
+        //======================================Metodos Auxiliares==================================================//
+
+    public static int listaPerguntas(int[] arrayIdPerguntas) throws Exception{
+        int cont = 0;
+
+        System.out.println("\t\nListando:\n___________________________________");
+
+        for(int i = 0; i < arrayIdPerguntas.length; i++){
+            Pergunta temp = arqPerguntas.read(arrayIdPerguntas[i]);
+            System.out.print("\n\n"+(i+1)+". ");
+            System.out.println(temp);
+
+            System.out.println("\n___________________________________");
+
+            cont++;
+        }
+
+        return cont;
+    }
+
+    public static int listaRespostas(int[] arrayIdRespostas) throws Exception{
+        int cont = 0;
+
+        for(int i = 0; i < arrayIdRespostas.length; i++){
+            Resposta temp = arqRespostas.read(arrayIdRespostas[i]);
+            System.out.print("\n"+(i+1)+". ");
+            System.out.println(temp);
+
+            System.out.println("\n___________________________________");
+
+            cont++;
+        }
+
+        return cont;
+    }
+
+
+
+    public static int[] retiraArquivadas(int[] arrayIdPerguntas) throws Exception {
+        int[] aux = new int[arrayIdPerguntas.length];
+        int j = 0;
+
+        for(int i = 0; i < arrayIdPerguntas.length; i++){
+            Pergunta temp = arqPerguntas.read(arrayIdPerguntas[i]);            
+            if(temp.ativa){
+                aux[j] = temp.getID();
+                j++;
+            }
+        }
+
+        int[] arrayAtivas = new int[j];
+        for(int i = 0; i < j; i++){
+            arrayAtivas[i] = aux[i];
+        }
+
+        return arrayAtivas;
+    }
+
+    public static int confirmar() throws InterruptedException {
+        int opcao;
+        System.out.println("1 - Sim");
+        System.out.println("2 - Não");
+        System.out.print("\nOpção: ");
+
+        try {
+            opcao = Integer.valueOf(leitor.nextLine());
+        } catch(NumberFormatException e) {
+            opcao = 2;
+            System.out.println("Opção inválida!");
+        }
+        return opcao;
     }
 
     private static void quicksort(Pergunta[] dados, int inicio, int fim){
