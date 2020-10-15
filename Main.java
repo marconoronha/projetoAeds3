@@ -578,9 +578,9 @@ public class Main{
             System.out.println("\n______________Respostas______________\n");
             listaRespostas(arvorePR.read(p.getID()));
         
-            System.out.println("\n\n1 - Responder");
-            System.out.println("2 - Comentar");
-            System.out.println("3 - Avaliar");
+            System.out.println("\n\n1 - Respostas");
+            System.out.println("2 - Comentários");
+            System.out.println("3 - Avaliar essa pergunta");
             System.out.println("\n0 - Retornar");
 
             System.out.print("\nOpção: ");
@@ -692,11 +692,11 @@ public class Main{
 
             switch(opcao){
                 case 1:{
-                    System.out.println("(não implementado)");                    
+                    listaMinhasRespostas(p);
                 }break;
 
                 case 2:{
-                    responder(p.getID());                    
+                    responder(p);                    
                 }break;
 
                 case 3:{
@@ -717,21 +717,23 @@ public class Main{
         }while(opcao != 0);
     }
 
-    public static void responder(int idPergunta) throws Exception {
+    public static void responder(Pergunta p) throws Exception {
         System.out.println("\n\n-------------------------------");
         System.out.println("           Respostas > Responder");
         System.out.println("-------------------------------");
 
-        System.out.println("Digite sua resposta:");
+        System.out.println(p);
+
+        System.out.println("\nDigite sua resposta:");
         String novaResposta = leitor.nextLine();
 
         System.out.println("\nConfirmar?:");
         int opcao = confirmar();
         
         if(opcao == 1){
-            Resposta r = new Resposta(idPergunta, idUsuarioAtual, novaResposta);
+            Resposta r = new Resposta(p.getID(), idUsuarioAtual, novaResposta);
             arqRespostas.create(r);
-            arvorePR.create(idPergunta, r.getID());
+            arvorePR.create(p.getID(), r.getID());
             arvoreUR.create(idUsuarioAtual, r.getID());            
             System.out.println("Resposta postada!");
             Thread.sleep(1500);
@@ -739,6 +741,22 @@ public class Main{
             System.out.println("Criação cancelada!");
             Thread.sleep(1500);
         }
+    }
+
+    public static void listaMinhasRespostas(Pergunta p) throws Exception {
+        int[] arrayIdMinhasRespostas = arvoreUR.read(idUsuarioAtual);
+        
+        System.out.println("\n\n-------------------------------");
+        System.out.println("           Respostas > Listar Minhas Respostas");
+        System.out.println("-------------------------------");
+        
+        System.out.println("\n"+p);
+
+        System.out.println("\t\nListando:\n___________________________________");
+        listaRespostas(arrayIdMinhasRespostas);
+
+        System.out.println("\nPressione qualquer tecla para voltar");
+        leitor.nextLine();
     }
 
 
@@ -768,7 +786,7 @@ public class Main{
 
         for(int i = 0; i < arrayIdRespostas.length; i++){
             Resposta temp = arqRespostas.read(arrayIdRespostas[i]);
-            System.out.print("\n\n"+(i+1)+". ");
+            System.out.print("\n"+(i+1)+". ");
             System.out.println(temp);
 
             System.out.println("\n___________________________________");
