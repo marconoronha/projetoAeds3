@@ -632,39 +632,6 @@ public class Main{
         return ordenado;
     }
 
-    private static void quicksort(Pergunta[] dados, int inicio, int fim){
-        if(inicio < fim){
-            int posPivo = _quicksort(dados, inicio, fim);
-            quicksort(dados, inicio, posPivo - 1);
-            quicksort(dados, posPivo+1, fim);
-        }
-    }
-
-    private static int _quicksort(Pergunta[] dados, int inicio, int fim){
-        Pergunta pivo = dados[inicio];
-        int i = inicio+1, f = fim;
-        while(i <= f){
-            if(dados[i].nota > pivo.nota){
-                i++;
-            }else{
-                if(pivo.nota >= dados[f].nota){
-                    f--;
-                }else{
-                    Pergunta troca = dados[i];
-                    dados[i] = dados[f];
-                    dados[f] = troca;
-                    i++;
-                    f--;
-                }
-            }
-        }
-
-        dados[inicio] = dados[f];
-        dados[f] = pivo;
-
-        return f;
-    }
-
     //======================================Metodos Respostas==================================================//
 
     public static void respostas(Pergunta p) throws Exception {
@@ -906,6 +873,39 @@ public class Main{
         for(int i = 0; i < tmp.length; i++){
             listaInvertida.delete(tmp[i], idPerg);
         }
+    }
+
+    private static void quicksort(Pergunta[] dados, int inicio, int fim){
+        if(inicio < fim){
+            int posPivo = _quicksort(dados, inicio, fim);
+            quicksort(dados, inicio, posPivo - 1);
+            quicksort(dados, posPivo+1, fim);
+        }
+    }
+
+    private static int _quicksort(Pergunta[] dados, int inicio, int fim){
+        Pergunta pivo = dados[inicio];
+        int i = inicio+1, f = fim;
+        while(i <= f){
+            if(dados[i].nota > pivo.nota){
+                i++;
+            }else{
+                if(pivo.nota >= dados[f].nota){
+                    f--;
+                }else{
+                    Pergunta troca = dados[i];
+                    dados[i] = dados[f];
+                    dados[f] = troca;
+                    i++;
+                    f--;
+                }
+            }
+        }
+
+        dados[inicio] = dados[f];
+        dados[f] = pivo;
+
+        return f;
     }
     
 
