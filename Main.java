@@ -21,14 +21,17 @@ public class Main{
 
         try {
 
+            //Inicializa os CRUDs
             arqUser = new CRUD<>(User.class.getConstructor(), "dados/users.db");
             arqPerguntas = new CRUD<>(Pergunta.class.getConstructor(), "dados/perguntas.db");
             arqRespostas = new CRUD<>(Resposta.class.getConstructor(), "dados/respostas.db");
             
+            //Iniciliza as estruturas que relacionam as entidades
             arvoreUP = new ArvoreBMais_Int_Int(10, "dados/arvRelacaoUserPerg.idx");
             arvorePR = new ArvoreBMais_Int_Int(10, "dados/arvRelacaoPergResp.idx");
             arvoreUR = new ArvoreBMais_Int_Int(10, "dados/arvRelacaoUserResp.idx");
-            
+
+            //Inicializa o dicionario que ira conter a relacao dos termos chaves e as perguntas            
             listaInvertida = new ListaInvertida(5, "dados/dicionario", "dados/dicBlocos");
 
             do {
@@ -37,12 +40,10 @@ public class Main{
 
                 switch (opcao) {
                     case 1: {
-                        //Faz login                
                         fazLogin();                        
                     }break;
 
                     case 2: {
-                        //cria nova conta                        
                         criaConta();
                     }break;
 
@@ -408,11 +409,7 @@ public class Main{
                                 }                                                          
                             }
                             
-                        }while(opcao < 0 || opcao > arrayPerguntas.length);
-
-                        if(opcao != 0){
-                            
-                        }                        
+                        }while(opcao < 0 || opcao > arrayPerguntas.length);                    
 
                         opcao = -1;
                     }break;
@@ -638,7 +635,7 @@ public class Main{
                 }break;
 
                 case 3:{
-                    System.out.println("(não implementado)");                    
+                    alterarResposta(p);
                 }break;
 
                 case 4:{
@@ -653,6 +650,22 @@ public class Main{
                 }
             }
         }while(opcao != 0);
+    }
+
+    public static void listaMinhasRespostas(Pergunta p) throws Exception {
+        int[] arrayIdMinhasRespostas = arvoreUR.read(idUsuarioAtual);
+        
+        System.out.println("\n\n-------------------------------");
+        System.out.println("           Respostas > Listar Minhas Respostas");
+        System.out.println("-------------------------------");
+        
+        System.out.println("\n"+p);
+
+        System.out.println("\t\nListando minhas respostas:\n___________________________________");
+        listaMinhasRespostas(arrayIdMinhasRespostas, p.getID());
+
+        System.out.println("\nPressione qualquer tecla para voltar");
+        leitor.nextLine();
     }
 
     public static void responder(Pergunta p) throws Exception {
@@ -681,23 +694,54 @@ public class Main{
         }
     }
 
-    public static void listaMinhasRespostas(Pergunta p) throws Exception {
+    public static void alterarResposta(Pergunta p) throws Exception {
         int[] arrayIdMinhasRespostas = arvoreUR.read(idUsuarioAtual);
-        
+        int opcao;
         System.out.println("\n\n-------------------------------");
-        System.out.println("           Respostas > Listar Minhas Respostas");
+        System.out.println("           Respostas > Alterar");
         System.out.println("-------------------------------");
         
         System.out.println("\n"+p);
 
-        System.out.println("\t\nListando:\n___________________________________");
-        listaMinhasRespostas(arrayIdMinhasRespostas, p.getID());
+        System.out.println("\t\nListando minhas respostas:\n___________________________________");
+        arrayIdMinhasRespostas = listaMinhasRespostas(arrayIdMinhasRespostas, p.getID());
 
-        System.out.println("\nPressione qualquer tecla para voltar");
-        leitor.nextLine();
+        do{
+            System.out.print("\nDigite o número da pergunta que será alterada (0 para sair): ");
+
+            try {
+                opcao = Integer.valueOf(leitor.nextLine());                                
+            } catch(NumberFormatException e) {
+                System.out.println("Opção inválida!");
+                opcao = -1;
+            }
+
+            if(opcao <= arrayIdMinhasRespostas.length && opcao >= 1){
+
+                Resposta temp = arqRespostas.read(arrayIdMinhasRespostas[(opcao-1)]);
+                System.out.print("Digite a alteração que deseja fazer: ");                                
+                String perguntaEditada = leitor.nextLine();
+                temp.resposta = perguntaEditada;
+                                                                
+                Date date = new Date();
+                temp.alteracao = date.getTime();
+                
+                arqRespostas.update(temp);
+                
+                System.out.println("Alteração realizada com sucesso!");
+                Thread.sleep(1500);
+            }else{
+
+                if(opcao != 0){
+                    System.out.println("Opção inválida!");
+                }                                                          
+            }
+            
+        }while(opcao < 0 || opcao > arrayIdMinhasRespostas.length);
+        
     }
 
-     //====================================== Metodos Termos Chaves ==================================================//
+    //====================================== Metodos Termos Chaves ==================================================//
 
     public static String converteChaves(String termosChaves){
         String convertida = termosChaves;
@@ -858,7 +902,7 @@ public class Main{
         return cont;
     }
 
-    public static int listaMinhasRespostas(int[] arrayIdMinhasRespostas, int idPergunta) throws Exception{
+    public static int[] listaMinhasRespostas(int[] arrayIdMinhasRespostas, int idPergunta) throws Exception{
         HashSet<Integer> idMinhasRespostasParaEssaPergunta = new HashSet<Integer>();
 
         for(int i = 0; i < arrayIdMinhasRespostas.length; i++){
@@ -877,10 +921,10 @@ public class Main{
             conjResposta[k++] = i;
         }
 
-        int cont = listaRespostas(conjResposta);
+        listaRespostas(conjResposta);
 
 
-        return cont;
+        return conjResposta;
     }
 
     public static int[] retiraArquivadas(int[] arrayIdPerguntas) throws Exception {
