@@ -439,7 +439,6 @@ public class Main{
                             if(opcao <= arrayPerguntas.length && opcao >= 1){
                                 
                                 temp = arqPerguntas.read(arrayPerguntas[(opcao-1)]);                                
-                                temp = arqPerguntas.read(arrayPerguntas[(opcao-1)]);
                                 System.out.println("\nConfirmar?");
                                 opcao = confirmar();
 
@@ -639,7 +638,7 @@ public class Main{
                 }break;
 
                 case 4:{
-                    System.out.println("(não implementado)");                    
+                    arquivarResposta(p);
                 }break;
 
                 case 0: break;
@@ -707,7 +706,7 @@ public class Main{
         arrayIdMinhasRespostas = listaMinhasRespostas(arrayIdMinhasRespostas, p.getID());
 
         do{
-            System.out.print("\nDigite o número da pergunta que será alterada (0 para sair): ");
+            System.out.print("\nDigite o número da resposta que será alterada (0 para sair): ");
 
             try {
                 opcao = Integer.valueOf(leitor.nextLine());                                
@@ -739,6 +738,57 @@ public class Main{
             
         }while(opcao < 0 || opcao > arrayIdMinhasRespostas.length);
         
+    }
+
+    public static void arquivarResposta(Pergunta p) throws Exception {
+        int[] arrayIdMinhasRespostas = arvoreUR.read(idUsuarioAtual);
+        int opcao;
+        System.out.println("\n\n-------------------------------");
+        System.out.println("           Respostas > Arquivar");
+        System.out.println("-------------------------------");
+        
+        System.out.println("\n"+p);
+
+        System.out.println("\t\nListando minhas respostas:\n___________________________________");
+        arrayIdMinhasRespostas = listaMinhasRespostas(arrayIdMinhasRespostas, p.getID());
+
+        do{
+            System.out.print("\nDigite o número da resposta que será arquivada (0 para sair): ");
+
+            try {
+                opcao = Integer.valueOf(leitor.nextLine());                                
+            } catch(NumberFormatException e) {
+                System.out.println("Opção inválida!");
+                opcao = -1;
+            }
+
+            if(opcao <= arrayIdMinhasRespostas.length && opcao >= 1){
+                                
+                Resposta temp = arqRespostas.read(arrayIdMinhasRespostas[(opcao-1)]);                                
+                System.out.println("\nConfirmar?");
+                opcao = confirmar();
+
+                if(opcao == 1){                            
+                    Date date = new Date();
+                    temp.ativa = false;
+                    temp.alteracao = date.getTime();
+                    arqRespostas.update(temp);
+                    arvoreUR.delete(idUsuarioAtual, temp.getID());
+                    arvorePR.delete(p.getID(), temp.getID());
+                    System.out.println("Resposta arquivada!");
+                }else{
+                    System.out.println("Arquivamento cancelado!");
+                
+                }
+                Thread.sleep(1500);
+
+            }else{
+                if(opcao != 0){
+                    System.out.println("Opção inválida!");
+                }                                                      
+            }
+            
+        }while(opcao < 0 || opcao > arrayIdMinhasRespostas.length);
     }
 
     //====================================== Metodos Termos Chaves ==================================================//
