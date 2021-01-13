@@ -1,5 +1,3 @@
-#### Grupo: Marco Aurélio de Noronha, Júnior Heleno Ávila, Cláudio Jansen, Paulo Rievrs Oliveira
-
 # Versão 4
 
 ## Respondendo Perguntas
